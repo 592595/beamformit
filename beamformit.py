@@ -28,11 +28,11 @@ def test(infilenames_cell, outfilename):
     print(win[1:10])
 
     # # calculate avg_ccorr
-    # npiece = 200
-    # nfft = 32768
-    # nbest = 2
-    # nmask = 5
-    # calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
+    npiece = 200
+    nfft = 32768
+    nbest = 2
+    nmask = 5
+    calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
     # ref_mic = calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
     # print(ref_mic)
 
@@ -165,8 +165,7 @@ def hamming_bfit(nwin):
 
 def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
     scroll = math.floor(nsample / (npiece + 2))
-
-    avg_ccorr = np.zeros(nmic)
+    avg_ccorr = np.zeros((nmic, nmic))
 
     for i in range(0, npiece):
         st = i * scroll + 1
@@ -176,8 +175,8 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
         for m1 in range(0, nmic - 1):
             avg_ccorr[m1, m1] = 0
             for m2 in range(m1, nmic):
-                stft1 = fft([np.dot(x[m1, st:ed], win), np.zeros(1, nfft - nwin)])
-                stft2 = fft([np.dot(x[m2, st:ed], win), np.zeros(1, nfft - nwin)])
+                stft1 = fft([np.dot(x[m1, st:ed], win), np.zeros((1, nfft - nwin))])
+                stft2 = fft([np.dot(x[m2, st:ed], win), np.zeros((1, nfft - nwin))])
                 numerator = np.dot(stft1, np.conj(stft2))
                 ccorr = (ifft(numerator / (abs(numerator)))).real
                 ccorr = [ccorr[ccorr[-1] - 479:ccorr[-1]], ccorr[1:480]]
@@ -185,6 +184,7 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
                 avg_ccorr[m1, m2] = avg_ccorr[m1, m2] + sum(maxk(ccorr, nbest, nmask))
                 avg_ccorr[m2, m1] = avg_ccorr[m1, m2]
     avg_ccorr = avg_ccorr / (nbest * npiece)
+    print(avg_ccorr)
     [dummy, ref_mic] = max(sum(avg_ccorr))
     print(ref_mic)
     # return ref_mic
