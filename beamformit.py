@@ -139,7 +139,6 @@ def get_x(infilenames_cell):
 
 def maxk(list, k, nmask):
     candi_list = np.zeros(len(list[:]))
-
     for i in range(1, (len(list[:]) - 1)):
         if list[i - 1] < list[i] and list[i + 1] < list[i]:
             candi_list[i] = list[i]
