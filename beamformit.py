@@ -39,13 +39,11 @@ def test(infilenames_cell, outfilename):
     # # calculating scaling factor
     # nsegment = 10
     # overall_weight = calculate_scaling_factor(x, sr, nsample, nmic, nsegment)
-    # print(overall_weight)
     #
     # # compute total number of delays
     # nwin = 8000
     # nshift = nwin / 2
     # nframe = math.floor((nsample - nwin) / (nshift))
-    # print(nframe)
     #
     # # recreating hamming window
     # win = hamming_bfit(nwin)
@@ -140,15 +138,15 @@ def get_x(infilenames_cell):
 
 
 def maxk(list, k, nmask):
-    candi_list = np.zeros(len(list[:]), 1)  # 不修改参数
+    candi_list = np.zeros(len(list[:]))
 
-    for i in range(1, (len(list[:]) - 2)):  # 修改参数
-        if list(i - 1) < list(i) and list(i + 1) < list(i):
-            candi_list[i] = list(i)
+    for i in range(1, (len(list[:]) - 1)):
+        if list[i - 1] < list[i] and list[i + 1] < list[i]:
+            candi_list[i] = list[i]
 
-    max_val = np.zeros(k, 1)
-    idx = np.zeros(k, 1)
-    for i in range(0, k - 1):
+    max_val = np.zeros(k)
+    idx = np.zeros(k)
+    for i in range(0, k):
         [max_val[i], idx[i]] = max(candi_list)
         st = max(idx[i] - nmask + 1, 1)
         ed = min(len(candi_list[:]), idx[i] + nmask - 1)
@@ -168,23 +166,24 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
     avg_ccorr = np.zeros((nmic, nmic))
 
     for i in range(0, npiece):
-        st = i * scroll + 1
-        ed = st + nwin - 1
+        st = i * scroll
+        ed = st + nwin
         if st + nfft / 2 >= nsample:
             break
         for m1 in range(0, nmic - 1):
             avg_ccorr[m1, m1] = 0
             for m2 in range(m1, nmic):
-                stft1 = fft([np.dot(x[m1, st:ed], win), np.zeros((1, nfft - nwin))])
-                stft2 = fft([np.dot(x[m2, st:ed], win), np.zeros((1, nfft - nwin))])
-                numerator = np.dot(stft1, np.conj(stft2))
+                stft1 = fft(np.append(np.multiply(x[m1, st:ed], win), np.zeros((nfft - nwin))))
+                stft2 = fft(np.append(np.multiply(x[m2, st:ed], win), np.zeros((nfft - nwin))))
+                numerator = np.multiply(stft1, np.conj(stft2))
                 ccorr = (ifft(numerator / (abs(numerator)))).real
-                ccorr = [ccorr[ccorr[-1] - 479:ccorr[-1]], ccorr[1:480]]
+                ccorr = np.append(ccorr[- 479:], ccorr[1:480])
 
                 avg_ccorr[m1, m2] = avg_ccorr[m1, m2] + sum(maxk(ccorr, nbest, nmask))
                 avg_ccorr[m2, m1] = avg_ccorr[m1, m2]
     avg_ccorr = avg_ccorr / (nbest * npiece)
     [dummy, ref_mic] = max(sum(avg_ccorr))
+    print(ref_mic)
     # return ref_mic
 
 
