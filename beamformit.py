@@ -176,7 +176,6 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
             avg_ccorr[m1, m1] = 0
             for m2 in range(m1, nmic):
                 stft1 = fft([np.dot(x[m1, st:ed], win), np.zeros((1, nfft - nwin))])
-                print(stft1)
                 stft2 = fft([np.dot(x[m2, st:ed], win), np.zeros((1, nfft - nwin))])
                 numerator = np.dot(stft1, np.conj(stft2))
                 ccorr = (ifft(numerator / (abs(numerator)))).real
