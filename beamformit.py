@@ -146,10 +146,11 @@ def maxk(list, k, nmask):
     max_val = np.zeros(k)
     idx = np.zeros(k)
     for i in range(0, k):
-        [max_val[i], idx[i]] = max(candi_list)
+        idx[i] = np.argmax(candi_list)
+        max_val[i] = max(candi_list)
         st = max(idx[i] - nmask + 1, 1)
         ed = min(len(candi_list[:]), idx[i] + nmask - 1)
-        candi_list[st:ed] = 0
+        candi_list[int(st):int(ed)] = 0
     return [max_val, idx]
 
 
@@ -219,7 +220,7 @@ def get_pair2mic(nmic, npair):
         p = 1
         for i in range(0, nmic - 1):
             pair2mic[m, p] = i
-            p = p + 1;
+            p = p + 1
     return pair2mic
 
 
