@@ -65,15 +65,16 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
                 avg_ccorr[m1, m2] = avg_ccorr[m1, m2] + sum(maxk(ccorr, nbest, nmask)[0])
                 avg_ccorr[m2, m1] = avg_ccorr[m1, m2]
     # print(scroll)
-    plt.figure()
-    plt.plot(ccorr)
-    plt.show()
+    # 这个图有点不一样
+    # plt.figure()
+    # plt.plot(ccorr)
+    # plt.show()
 
     avg_ccorr = avg_ccorr / (nbest * npiece)
     dummy = max(sum(avg_ccorr))
     ref_mic = np.argmax(sum(avg_ccorr))
-    print(ref_mic)
-    return ref_mic
+    # 这里ref_mic应该是4，但是现在是3
+    return ref_mic+1
 
 
 def calculate_scaling_factor(x, sr, nsample, nmic, nsegment):

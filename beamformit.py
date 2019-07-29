@@ -33,9 +33,7 @@ def test(infilenames_cell, outfilename):
     nfft = 32768
     nbest = 2
     nmask = 5
-    fc.calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
-
-    # ref_mic = fc.calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
+    ref_mic = fc.calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
 
     # # calculating scaling factor
     # nsegment = 10
