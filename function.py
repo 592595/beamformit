@@ -62,10 +62,16 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
                 ccorr = (ifft(numerator / (abs(numerator)))).real
                 ccorr = np.append(ccorr[- 479:], ccorr[1:480])
 
-                avg_ccorr[m1, m2] = avg_ccorr[m1, m2] + sum(maxk(ccorr, nbest, nmask))
+                avg_ccorr[m1, m2] = avg_ccorr[m1, m2] + sum(maxk(ccorr, nbest, nmask)[0])
                 avg_ccorr[m2, m1] = avg_ccorr[m1, m2]
+    # print(scroll)
+    plt.figure()
+    plt.plot(ccorr)
+    plt.show()
+
     avg_ccorr = avg_ccorr / (nbest * npiece)
-    dummy, ref_mic = max(sum(avg_ccorr))
+    dummy = max(sum(avg_ccorr))
+    ref_mic = np.argmax(sum(avg_ccorr))
     print(ref_mic)
     return ref_mic
 
