@@ -55,7 +55,7 @@ def test(infilenames_cell, outfilename):
     # get pair2mic table
     pair2mic = fc.get_pair2mic(nmic, npair)
 
-    # compute TDOA
+    # compute TDOA还没改完！
     nbest = 4
     nfft = 16384
     [gcc_nbest, tdoa_nbest] = fc.compute_tdoa(x, npair, ref_mic, pair2mic, nframe, win, nwin, nshift, nfft, nbest, nmask)
