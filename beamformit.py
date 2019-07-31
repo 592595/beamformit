@@ -35,34 +35,36 @@ def test(infilenames_cell, outfilename):
     nmask = 5
     ref_mic = fc.calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask)
 
-    # # calculating scaling factor
-    # nsegment = 10
-    # overall_weight = calculate_scaling_factor(x, sr, nsample, nmic, nsegment)
-    #
-    # # compute total number of delays
-    # nwin = 8000
-    # nshift = nwin / 2
-    # nframe = math.floor((nsample - nwin) / (nshift))
-    #
-    # # recreating hamming window
-    # win = hamming_bfit(nwin)
-    # plt.figure()
-    # plt.plot(win)
-    # print(16000 * 30 / 1000)
-    #
-    # # get pair2mic table
-    # pair2mic = get_pair2mic(nmic, npair)
-    #
-    # # compute TDOA
-    # nbest = 4
-    # nfft = 16384
-    # [gcc_nbest, tdoa_nbest] = compute_tdoa(x, npair, ref_mic, pair2mic, nframe, win, nwin, nshift, nfft, nbest, nmask)
-    # print(np.squeeze(gcc_nbest[:, :, 1]))
-    # print(np.squeeze(gcc_nbest[:, :, 2]))
-    #
-    # print(np.squeeze(tdoa_nbest[:, :, 1]))
-    # print(np.squeeze(tdoa_nbest[:, :, 2]))
-    #
+    # calculating scaling factor
+    nsegment = 10
+    overall_weight = fc.calculate_scaling_factor(x, sr, nsample, nmic, nsegment)
+
+    # compute total number of delays
+    nwin = 8000
+    nshift = nwin / 2
+    nframe = math.floor((nsample - nwin) / (nshift))
+    print(nframe)
+
+    # recreating hamming window
+    win = fc.hamming_bfit(nwin)
+    plt.figure()
+    plt.plot(win)
+    plt.show()
+    print(16000 * 30 / 1000)
+
+    # get pair2mic table
+    pair2mic = fc.get_pair2mic(nmic, npair)
+
+    # compute TDOA
+    nbest = 4
+    nfft = 16384
+    [gcc_nbest, tdoa_nbest] = fc.compute_tdoa(x, npair, ref_mic, pair2mic, nframe, win, nwin, nshift, nfft, nbest, nmask)
+    print(np.squeeze(gcc_nbest[:, :, 1]))
+    print(np.squeeze(gcc_nbest[:, :, 2]))
+
+    print(np.squeeze(tdoa_nbest[:, :, 1]))
+    print(np.squeeze(tdoa_nbest[:, :, 2]))
+
     # # find noise threshold
     # threshold = get_noise_threshold(gcc_nbest, nmic, ref_mic, nframe)
     # print(threshold)

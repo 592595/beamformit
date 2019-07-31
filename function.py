@@ -74,13 +74,13 @@ def calcuate_avg_ccorr(x, nsample, nmic, npiece, win, nwin, nfft, nbest, nmask):
     dummy = max(sum(avg_ccorr))
     ref_mic = np.argmax(sum(avg_ccorr))
     # 这里ref_mic应该是4，但是现在是3
-    return ref_mic+1
+    return ref_mic + 1
 
 
 def calculate_scaling_factor(x, sr, nsample, nmic, nsegment):
-    max_val = np.zeros(nmic, 1)
+    max_val = np.zeros(nmic)
     if nsample <= 10 * sr:
-        for m in range(0, nmic - 1):
+        for m in range(0, nmic):
             max_val[m] = max(abs(x[m, :]))
     else:
         if nsample < 100 * sr:
@@ -88,27 +88,29 @@ def calculate_scaling_factor(x, sr, nsample, nmic, nsegment):
         scroll = math.floor(np.size(x, 1) / nsegment)
         max_val_candidate = np.zeros(nmic, nsegment)
 
-        for s in range(-1, nsegment - 2):
+        for s in range(-1, nsegment - 1):
             st = s * scroll + 1
             ed = st + 160000 - 1
-            for m in range(0, nmic - 1):
+            for m in range(0, nmic):
                 max_val_candidate[m, s + 1] = max(abs(x[m, st:ed]))
-        for m in range(0, nmic - 1):
-            sorted = sorted(max_val_candidate[m, :], 'ascend')
+
+        for m in range(0, nmic):
+            sorted = sorted(max_val_candidate[m, :])
             if len(sorted[:]) > 2:
                 max_val[m] = sorted(math.floor(sorted[-1] / 2) + 1)
             else:
                 max_val[m] = sorted
 
     overall_weight = (0.3 * nmic) / sum(max_val)
+    print(overall_weight)
     return overall_weight
 
 
 def get_pair2mic(nmic, npair):
-    pair2mic = np.zeros(nmic, npair)
-    for m in range(0, nmic - 1):
-        p = 1
-        for i in range(0, nmic - 1):
+    pair2mic = np.zeros((nmic, npair))
+    for m in range(0, nmic):
+        p = 0
+        for i in range(0, nmic):
             pair2mic[m, p] = i
             p = p + 1
     return pair2mic
@@ -126,20 +128,21 @@ def get_mic2refpair(pair2mic, ref_mic, nmic, npair):
 
 
 def compute_tdoa(x, npair, ref_mic, pair2mic, nframe, win, nwin, nshift, nfft, nbest, nmask):
-    gcc_nbest = np.zeros(npair, nframe, nbest)
-    tdoa_nbest = np.zeros(npair, nframe, nbest)
+    gcc_nbest = np.zeros((npair, nframe, nbest))
+    tdoa_nbest = np.zeros((npair, nframe, nbest))
 
-    for t in range(0, (nframe - 1)):
+    for t in range(0, nframe):
         st = (t - 1) * nshift + 1
         ed = st + nwin - 1
-        for p in range(0, npair - 1):
+        for p in range(0, npair):
+
             m = pair2mic(ref_mic, p)
-            stft_ref = fft([np.dot(x[ref_mic, st:ed], win), np.zeros(1, nfft - nwin)])
-            stft_m = fft([np.dot(x[m, st:ed], win), np.zeros(1, nfft - nwin)])
-            numerator = np.dot(stft_m, math.conj(stft_ref))
-            # gcc = (ifft(numerator/(eps + abs(numerator)))).real
-            gcc = (ifft(numerator / (abs(numerator)))).real
-            gcc = [gcc[gcc[-1] - 479:gcc[-1]], gcc[1: 480]]
+
+            stft_ref = fft(np.append(np.multiply(x[ref_mic, st:ed], win), np.zeros(1, nfft - nwin)))
+            stft_m = fft(np.append(np.multiply(x[m, st:ed], win), np.zeros(1, nfft - nwin)))
+            numerator = np.multiply(stft_m, np.conj(stft_ref))
+            gcc = ifft(numerator / (abs(numerator))).real  # 浮点数精度没有处理好
+            gcc = np.append(gcc[- 479:], gcc[1: 480])
             [gcc_nbest[p, t, :], tdoa_nbest[p, t, :]] = maxk(gcc, nbest, nmask)
             tdoa_nbest[p, t, :] = tdoa_nbest[p, t, :] - (481)
     return [gcc_nbest, tdoa_nbest]
