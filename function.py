@@ -135,16 +135,14 @@ def compute_tdoa(x, npair, ref_mic, pair2mic, nframe, win, nwin, nshift, nfft, n
         st = (t - 1) * nshift + 1
         ed = st + nwin - 1
         for p in range(0, npair):
-
-            m = pair2mic(ref_mic, p)
-
-            stft_ref = fft(np.append(np.multiply(x[ref_mic, st:ed], win), np.zeros(1, nfft - nwin)))
-            stft_m = fft(np.append(np.multiply(x[m, st:ed], win), np.zeros(1, nfft - nwin)))
+            m = pair2mic[ref_mic, p]
+            stft_ref = fft(np.append(np.multiply(x[ref_mic, st:ed], win), np.zeros(nfft - nwin)))
+            stft_m = fft(np.append(np.multiply(x[m, st:ed], win), np.zeros(nfft - nwin)))
             numerator = np.multiply(stft_m, np.conj(stft_ref))
-            gcc = ifft(numerator / (abs(numerator))).real  # 浮点数精度没有处理好
+            gcc = (ifft(numerator /(abs(numerator)))).real  # 浮点数精度没有处理好
             gcc = np.append(gcc[- 479:], gcc[1: 480])
             [gcc_nbest[p, t, :], tdoa_nbest[p, t, :]] = maxk(gcc, nbest, nmask)
-            tdoa_nbest[p, t, :] = tdoa_nbest[p, t, :] - (481)
+            tdoa_nbest[p, t, :] = tdoa_nbest[p, t, :] - 481
     return [gcc_nbest, tdoa_nbest]
 
 
